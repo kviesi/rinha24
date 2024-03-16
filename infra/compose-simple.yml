@@ -1,0 +1,25 @@
+services:
+
+  api:
+    image: docker.io/library/rinha2024:0.0.1-SNAPSHOT
+    depends_on:
+      - db
+    ports:
+      - '8080:8080'
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "2048MB"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha24
+
+  db:
+    image: postgres:alpine
+    hostname: db
+    environment:
+      POSTGRES_DB: rinha24
+      POSTGRES_USER: rinha24
+      POSTGRES_PASSWORD: rinha24
+    volumes:
+      - ./db/script.sql:/docker-entrypoint-initdb.d/script.sql

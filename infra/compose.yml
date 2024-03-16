@@ -1,0 +1,65 @@
+services:
+
+  api01:
+    image: docker.io/library/rinha2024:0.0.1-SNAPSHOT
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "115MB"
+    depends_on:
+      - db
+    environment:
+#      JAVA_TOOL_OPTIONS: -XX:+UseParallelGC
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha24
+
+  api02:
+    image: docker.io/library/rinha2024:0.0.1-SNAPSHOT
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "115MB"
+    depends_on:
+      - db
+    environment:
+#      JAVA_TOOL_OPTIONS: -XX:+UseParallelGC
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rinha24
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./lb/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api01
+      - api02
+    ports:
+      # Obrigatório expor/usar a porta 9999 no load balancer!
+      - "9999:9999"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.15"
+          memory: "20MB"
+
+  db:
+    image: postgres:alpine
+    hostname: db
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: rinha24
+      POSTGRES_USER: rinha24
+      POSTGRES_PASSWORD: rinha24
+    volumes:
+      - ./db/script.sql:/docker-entrypoint-initdb.d/script.sql
+    deploy:
+      resources:
+        limits:
+          cpus: "0.8"
+          memory: "300MB"
+
+networks:
+  default:
+    driver: bridge
+    name: rinha24
